@@ -1,4 +1,4 @@
-# Metronome for Flarum
+# Link Robins Metronome
 
 [![Latest Version](https://img.shields.io/packagist/v/linkrobins/metronome)](https://packagist.org/packages/linkrobins/metronome)
 [![Downloads](https://img.shields.io/packagist/dt/linkrobins/metronome)](https://packagist.org/packages/linkrobins/metronome)
@@ -32,7 +32,7 @@ nothing, and it looks like their bug.
 composer require linkrobins/metronome
 ```
 
-Enable **Metronome** in the admin panel, then point your cron job
+Enable **Link Robins Metronome** in the admin panel, then point your cron job
 (or your host's "cron jobs" panel, which is exactly the environment this is
 for) at the new command once per minute:
 

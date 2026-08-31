@@ -40,7 +40,7 @@
     },
     "extra": {
         "flarum-extension": {
-            "title": "Metronome",
+            "title": "Link Robins Metronome",
             "category": "feature",
             "icon": {
                 "name": "fas fa-clock",
