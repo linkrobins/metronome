@@ -66,6 +66,13 @@ upfront about both instead of skipping work silently:
   without launching a process. It is reported as a failed task rather than
   ignored.
 
+One more behavioral difference, unrelated to `proc_open`: tasks scheduled
+at sub-minute rates (`everyFifteenSeconds()` and friends) fire once per
+invocation instead of repeating until the end of the minute the way the
+stock runner does. Since cron itself runs once per minute, that means once
+per minute. Nothing in the Flarum ecosystem schedules sub-minute today, but
+if your task does, know that it will tick at cron's pace.
+
 If your hosting does have `proc_open`, keep using the stock
 `schedule:run`. This extension is for the hosts where that is not an option.
 
