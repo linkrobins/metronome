@@ -1,0 +1,70 @@
+{
+    "name": "linkrobins/metronome",
+    "description": "Run Flarum's scheduler without proc_open \u2014 for shared hosting that disables it",
+    "keywords": [
+        "flarum",
+        "scheduler",
+        "cron",
+        "shared-hosting"
+    ],
+    "homepage": "https://linkrobins.com/extensions/metronome",
+    "type": "flarum-extension",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Link Robins",
+            "email": "karl@linkrobins.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/linkrobins/metronome/issues",
+        "source": "https://github.com/linkrobins/metronome"
+    },
+    "require": {
+        "php": "^8.3",
+        "flarum/core": "^2.0"
+    },
+    "require-dev": {
+        "flarum/testing": "^2.0",
+        "flarum/phpstan": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "LinkRobins\\Metronome\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LinkRobins\\Metronome\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "flarum-extension": {
+            "title": "Metronome",
+            "category": "feature",
+            "icon": {
+                "name": "fas fa-clock",
+                "backgroundColor": "#1a2535",
+                "color": "#07adcc"
+            }
+        },
+        "flarum-cli": {
+            "modules": {
+                "githubActions": true,
+                "backendTesting": true
+            }
+        }
+    },
+    "minimum-stability": "beta",
+    "prefer-stable": true,
+    "scripts": {
+        "analyse:phpstan": "phpstan analyse",
+        "test": [
+            "@test:unit",
+            "@test:integration"
+        ],
+        "test:unit": "phpunit -c tests/phpunit.unit.xml",
+        "test:integration": "phpunit -c tests/phpunit.integration.xml",
+        "test:setup": "@php tests/integration/setup.php"
+    }
+}

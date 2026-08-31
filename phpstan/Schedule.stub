@@ -1,0 +1,34 @@
+<?php
+
+namespace Flarum\Console;
+
+class Schedule
+{
+    /**
+     * Flarum's override wraps the container in a maintenance-mode adapter,
+     * so unlike the inherited Illuminate signature it takes the plain
+     * container, not a Laravel Application. Core calls it the same way.
+     *
+     * @param \Illuminate\Contracts\Container\Container $app
+     * @return \Illuminate\Support\Collection<int, \Illuminate\Console\Scheduling\Event>
+     */
+    public function dueEvents($app)
+    {
+    }
+}
+
+namespace Illuminate\Console\Scheduling;
+
+class Event
+{
+    /**
+     * Only feeds the filter/reject callbacks through $app->call(), so any
+     * container satisfies it - Flarum has no Laravel Application to give it.
+     *
+     * @param \Illuminate\Contracts\Container\Container $app
+     * @return bool
+     */
+    public function filtersPass($app)
+    {
+    }
+}
