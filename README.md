@@ -32,13 +32,22 @@ nothing, and it looks like their bug.
 composer require linkrobins/metronome
 ```
 
-Enable **Link Robins Metronome** in the admin panel, then point your cron job
-(or your host's "cron jobs" panel, which is exactly the environment this is
-for) at the new command once per minute:
+Enable **Link Robins Metronome** in the admin panel, then **replace** your
+existing scheduler cron line (or your host's "cron jobs" panel entry, which
+is exactly the environment this is for) with the new command, once per
+minute:
 
 ```
 * * * * * php /path/to/flarum/flarum schedule:run-inline
 ```
+
+**Replace, do not add.** If `schedule:run` and `schedule:run-inline` both
+stay in cron, every scheduled task runs twice per minute, and
+`withoutOverlapping()` will not prevent that (it only stops overlapping
+runs, not two quick runs in a row). Metronome detects this and warns in its
+output and the Flarum log, but the fix is removing the old line. If you
+never had a scheduler cron line (which is likely why you are here), there is
+nothing to remove.
 
 That is the whole setup. There are no settings.
 

@@ -24,6 +24,7 @@ use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Carbon;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -41,12 +42,22 @@ class RunInlineCommand extends AbstractCommand
 {
     protected bool $eventsRan = false;
 
+    /**
+     * Core stamps this key when the stock schedule:run finishes; we stamp it
+     * too (the admin dashboard reads it), plus our own twin key below. When
+     * the shared key moves ahead of our twin, a stock runner executed the
+     * schedule since we last did - almost always a leftover cron line.
+     */
+    protected const STOCK_STAMP = 'flarum:schedule:last_run';
+    protected const OWN_STAMP = 'linkrobins-metronome:last_run';
+
     public function __construct(
         protected Container $container,
         protected Schedule $schedule,
         protected Dispatcher $events,
         protected ExceptionHandler $exceptions,
-        protected Cache $cache
+        protected Cache $cache,
+        protected LoggerInterface $log
     ) {
         parent::__construct();
     }
@@ -61,6 +72,8 @@ class RunInlineCommand extends AbstractCommand
     protected function fire(): int
     {
         $startedAt = Carbon::now();
+
+        $this->warnIfStockSchedulerAlsoRuns();
 
         $schedule = $this->schedule;
 
@@ -101,10 +114,48 @@ class RunInlineCommand extends AbstractCommand
         // `schedule:run` command finishing (core listens for its
         // CommandFinished event), so no matter how faithfully this command
         // runs the schedule, the dashboard would call the scheduler dead.
-        // Stamp the same cache key core's listener writes.
-        $this->cache->forever('flarum:schedule:last_run', Carbon::now());
+        // Stamp the same cache key core's listener writes, and our twin with
+        // the identical instant so drift between them means a stock run.
+        $now = Carbon::now();
+        $this->cache->forever(self::STOCK_STAMP, $now);
+        $this->cache->forever(self::OWN_STAMP, $now);
 
         return self::SUCCESS;
+    }
+
+    /**
+     * A doubled cron (schedule:run-inline added alongside schedule:run
+     * instead of replacing it) runs every scheduled task twice per minute.
+     * withoutOverlapping() will not save anyone from that: it only stops
+     * concurrent runs, not two fast sequential ones. Detect and nag.
+     */
+    protected function warnIfStockSchedulerAlsoRuns(): void
+    {
+        $stock = $this->cache->get(self::STOCK_STAMP);
+        $own = $this->cache->get(self::OWN_STAMP);
+
+        if (! $stock) {
+            return;
+        }
+
+        $stock = Carbon::parse($stock);
+
+        // An old stamp from before the switch to Metronome is fine; only a
+        // fresh one means another runner is live right now.
+        if ($stock->lt(Carbon::now()->subMinutes(10))) {
+            return;
+        }
+
+        if ($own && $stock->lte(Carbon::parse($own))) {
+            return;
+        }
+
+        $warning = 'The stock schedule:run also ran in the last few minutes. If schedule:run-inline was added '
+            .'as a second cron line, remove the schedule:run line: running both executes every scheduled task '
+            .'twice. If you just ran schedule:run by hand, ignore this.';
+
+        $this->error($warning);
+        $this->log->warning('[linkrobins/metronome] '.$warning);
     }
 
     protected function runEvent(Event $event): void
