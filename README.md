@@ -32,7 +32,7 @@ nothing, and it looks like their bug.
 composer require linkrobins/metronome
 ```
 
-Enable **Link Robins Metronome** in the admin panel, then **replace** your
+Switch **Link Robins Metronome** on in the admin panel's Extensions page, then **replace** your
 existing scheduler cron line (or your host's "cron jobs" panel entry, which
 is exactly the environment this is for) with the new command, once per
 minute:
@@ -85,9 +85,18 @@ if your task does, know that it will tick at cron's pace.
 If your hosting does have `proc_open`, keep using the stock
 `schedule:run`. This extension is for the hosts where that is not an option.
 
-## Flarum compatibility
+## Updating
 
-Flarum 2.0 only. There is no build for Flarum 1.8.
+```bash
+composer update linkrobins/metronome
+php flarum cache:clear
+```
+
+## Requirements
+
+- Flarum 2.0 or later (there is no build for Flarum 1.8)
+- PHP 8.3+
+- Permission to add a cron job that runs once per minute (most shared hosts offer this in their control panel)
 
 ## Support
 
